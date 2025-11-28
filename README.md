@@ -89,10 +89,13 @@ DO NOT PRESS CTRL+C
 Leave it running!
 
 ## 3️ Open a NEW terminal window
+
 > Put this NEW terminal’s shell into the cgroup
+
 **echo $$ | sudo tee /sys/fs/cgroup/mybpf/cgroup.procs**
 
 > Verify:
+
 **cat /sys/fs/cgroup/mybpf/cgroup.procs**
 
 You should see SHELL'S PID.
