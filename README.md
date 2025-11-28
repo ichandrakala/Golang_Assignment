@@ -64,3 +64,55 @@ prog/xdp id ...
 
 
 # Steps to execute Problem statement2: Drop packets only for a given process
+## 1️ CREATE a fresh cgroup
+
+**sudo mkdir -p /sys/fs/cgroup/mybpf**
+
+> Verify:
+**ls /sys/fs/cgroup/mybpf**
+
+## 2️ Run the eBPF LOADER (this MUST stay running)
+
+> Go to your project folder:
+**cd ~/ebpf-drop/Task2**
+
+> Run:
+**sudo /usr/local/go/bin/go run main.go\
+  -obj filter.o \
+  -cgroup /sys/fs/cgroup/mybpf**
+
+> Expected output:
+attached program to cgroup /sys/fs/cgroup/mybpf
+Press Ctrl+C to exit...
+
+DO NOT PRESS CTRL+C
+Leave it running!
+
+## 3️ Open a NEW terminal window
+> Put this NEW terminal’s shell into the cgroup
+**echo $$ | sudo tee /sys/fs/cgroup/mybpf/cgroup.procs**
+
+> Verify:
+**cat /sys/fs/cgroup/mybpf/cgroup.procs**
+
+You should see SHELL'S PID.
+
+## 4 Run myprocess
+
+**gcc myprocess.c -o myprocess**
+
+> In this same terminal:
+
+**./myprocess 8080**
+
+EXPECTED (BLOCKED by eBPF):
+connect: Permission denied
+
+Then test allowed port:
+**./myprocess 4040**
+
+EXPECTED:
+connect: Connection refused 
+(Allowed by eBPF but no server listening)
+connect: Success 
+(Allowed by eBPF when server is listening)
