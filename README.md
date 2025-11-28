@@ -134,47 +134,36 @@ Press Ctrl+C to stop it.
 
 ## Explanation for the highlighted constructs
 > cnp is the channel variable.
-> chan func() is the type of the channel. It can carry functions with no parameters and no return values. The number 10 is the capacity, meaning the channel can hold up to 10 functions at once.
-> make is used to create the channel.
+> chan func() is the buffered channel of length 10. It can carry functions with no parameters and no return values. 
+> make is used to initiate the channel.
 > go func() { ... }() starts a new goroutine.
 > for i := 0; i < 4; i++ { ... } runs 4 times and creates 4 worker goroutines.
 > for f := range cnp { f() } receiving the channels using range.
 > () at the end of func() { ... } calls the anonymous function immediately.
 > func() { fmt.Println("HERE1") } is an anonymous function that will print "HERE1".
-> cnp <- sends that function into the channel so a goroutine can pick it up and execute it.
+> cnp <- sends that function into the channel.
 
 ## Use Cases
-
-make(chan func(), 10)
-Can be used in a small web server.
-Each incoming request is wrapped as a function and pushed into this channel.
-Workers (goroutines) then pick functions from the channel and process the requests.
-for i := 0; i < 4; i++ { go func() { ... }() }
-Useful when downloading files from the internet.
-Instead of downloading them one by one, you start 4 goroutines to download files in parallel.
-for f := range cnp { f() }
-Works as a background worker.
-It keeps waiting for new tasks (like new emails).
-Whenever a task is added to the channel, the worker picks it up and executes it.
-cnp <- func() { fmt.Println("HERE1") }
-Can be used for logging.
-A worker can receive this function and print to a log file (or console).
+> make(chan func(), 10) : Can be used to initialize a buffered channel.
+> Workers (goroutines) :  is a thread which process and communicated using the channel and process the requests.
+> for i := 0; i < 4; i++ { go func() { ... }() } : starting the 4 worker go routinues
+> for f := range cnp { f() }: is to used retrive from channel
+> cnp <- func() { fmt.Println("HERE1") } : Send the data to the channel
 
 ## What is the significance of FOR Loop with 4 iterations?
-The loop runs 4 times.
-In each iteration, a new goroutine (background worker) is created.
-These 4 workers all listen to the same channel cnp.
-When functions are sent into the channel, they can be shared among the 4 workers.
-This allows the work to be done in parallel instead of by just one worker.
+> The loop runs 4 times.
+> In each iteration, a new goroutine (background worker) is created.
+> These 4 workers all listen to the same channel cnp.
+> When functions are sent into the channel, they can be shared among the 4 workers.
+> This allows the work to be done in concurrently.
 
 ##  What is the significance of make(chan func(), 10)?
-It creates a channel named cnp that can hold functions.
-The number 10 is the buffer size, so it can store 10 functions before blocking.
-It provides a safe way for goroutines to send functions to each other for execution.
+> It creates a channel named cnp that can hold functions.
+> The number 10 is the buffer size, so it can store 10 functions without blocking.
+> It provides a safe way for goroutines to send and receive functions during execution.
 
 ##  Why "HERE1" is not getting printed?
-
-The function that prints "HERE1" is placed into the channel.
-But the main program quickly prints "Hello" and then exits.
-Since the program ends, the goroutines do not get enough time to pick up and run the "HERE1" function.
-That is why "HERE1" does not appear.
+> The function which prints "HERE1" is sent into the channel.
+> while the main thread started execution and printed "Hello" and then exits.
+> The main thread doesnt wait for the goroutines, so gorountines doesnt complete the process so "HERE1" is not printed.
+> We need to give some sleep like time.Sleep(10* time.Second) for "HERE1" to print.
