@@ -134,36 +134,57 @@ Press Ctrl+C to stop it.
 
 ## Explanation for the highlighted constructs
 > cnp is the channel variable.
-> chan func() is the buffered channel of length 10. It can carry functions with no parameters and no return values. 
+
+> chan func() is the buffered channel of length 10. It can carry functions with no parameters and no return values.
+
 > make is used to initiate the channel.
+
 > go func() { ... }() starts a new goroutine.
+
 > for i := 0; i < 4; i++ { ... } runs 4 times and creates 4 worker goroutines.
+
 > for f := range cnp { f() } receiving the channels using range.
+
 > () at the end of func() { ... } calls the anonymous function immediately.
+
 > func() { fmt.Println("HERE1") } is an anonymous function that will print "HERE1".
+
 > cnp <- sends that function into the channel.
 
 ## Use Cases
 > make(chan func(), 10) : Can be used to initialize a buffered channel.
+
 > Workers (goroutines) :  is a thread which process and communicated using the channel and process the requests.
+
 > for i := 0; i < 4; i++ { go func() { ... }() } : starting the 4 worker go routinues
+
 > for f := range cnp { f() }: is to used retrive from channel
+
 > cnp <- func() { fmt.Println("HERE1") } : Send the data to the channel
 
 ## What is the significance of FOR Loop with 4 iterations?
 > The loop runs 4 times.
+
 > In each iteration, a new goroutine (background worker) is created.
+
 > These 4 workers all listen to the same channel cnp.
+
 > When functions are sent into the channel, they can be shared among the 4 workers.
+
 > This allows the work to be done in concurrently.
 
 ##  What is the significance of make(chan func(), 10)?
 > It creates a channel named cnp that can hold functions.
+
 > The number 10 is the buffer size, so it can store 10 functions without blocking.
+
 > It provides a safe way for goroutines to send and receive functions during execution.
 
 ##  Why "HERE1" is not getting printed?
 > The function which prints "HERE1" is sent into the channel.
+
 > while the main thread started execution and printed "Hello" and then exits.
+
 > The main thread doesnt wait for the goroutines, so gorountines doesnt complete the process so "HERE1" is not printed.
+
 > We need to give some sleep like time.Sleep(10* time.Second) for "HERE1" to print.
