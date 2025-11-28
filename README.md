@@ -116,3 +116,65 @@ connect: Connection refused
 (Allowed by eBPF but no server listening)
 connect: Success 
 (Allowed by eBPF when server is listening)
+
+## CLEANUP EVERYTHING FIRST
+> Stop any running loader
+
+If your loader is running:
+Press Ctrl+C to stop it.
+
+> Remove the old cgroup
+**sudo rmdir /sys/fs/cgroup/mybpf**
+
+> Kill old myprocess instances
+ **sudo pkill myprocess**
+
+
+# Explanation for Problem Statement 3:
+
+## Explanation for the highlighted constructs
+> cnp is the channel variable.
+> chan func() is the type of the channel. It can carry functions with no parameters and no return values. The number 10 is the capacity, meaning the channel can hold up to 10 functions at once.
+> make is used to create the channel.
+> go func() { ... }() starts a new goroutine.
+> for i := 0; i < 4; i++ { ... } runs 4 times and creates 4 worker goroutines.
+> for f := range cnp { f() } receiving the channels using range.
+> () at the end of func() { ... } calls the anonymous function immediately.
+> func() { fmt.Println("HERE1") } is an anonymous function that will print "HERE1".
+> cnp <- sends that function into the channel so a goroutine can pick it up and execute it.
+
+## Use Cases
+
+make(chan func(), 10)
+Can be used in a small web server.
+Each incoming request is wrapped as a function and pushed into this channel.
+Workers (goroutines) then pick functions from the channel and process the requests.
+for i := 0; i < 4; i++ { go func() { ... }() }
+Useful when downloading files from the internet.
+Instead of downloading them one by one, you start 4 goroutines to download files in parallel.
+for f := range cnp { f() }
+Works as a background worker.
+It keeps waiting for new tasks (like new emails).
+Whenever a task is added to the channel, the worker picks it up and executes it.
+cnp <- func() { fmt.Println("HERE1") }
+Can be used for logging.
+A worker can receive this function and print to a log file (or console).
+
+## What is the significance of FOR Loop with 4 iterations?
+The loop runs 4 times.
+In each iteration, a new goroutine (background worker) is created.
+These 4 workers all listen to the same channel cnp.
+When functions are sent into the channel, they can be shared among the 4 workers.
+This allows the work to be done in parallel instead of by just one worker.
+
+##  What is the significance of make(chan func(), 10)?
+It creates a channel named cnp that can hold functions.
+The number 10 is the buffer size, so it can store 10 functions before blocking.
+It provides a safe way for goroutines to send functions to each other for execution.
+
+##  Why "HERE1" is not getting printed?
+
+The function that prints "HERE1" is placed into the channel.
+But the main program quickly prints "Hello" and then exits.
+Since the program ends, the goroutines do not get enough time to pick up and run the "HERE1" function.
+That is why "HERE1" does not appear.
