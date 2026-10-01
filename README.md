@@ -45,7 +45,7 @@ prog/xdp id ...
 
 > Test allowed port passes, other ports drop
 
-** go run main.go
+**go run main.go
 
 ### 5. Detach XDP Program (This means → packet dropping stopped)
 
