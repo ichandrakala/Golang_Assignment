@@ -110,6 +110,9 @@ You should see SHELL'S PID.
 EXPECTED (BLOCKED by eBPF):
 connect: Permission denied
 
+> Running the server :
+**go run server.go**
+
 Then test allowed port:
 **./myprocess 4040**
 
